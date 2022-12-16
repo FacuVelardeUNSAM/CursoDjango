@@ -1,0 +1,160 @@
+Materiales
+- VS Code
+- Extenciones:
+	Bootstrap5
+	Github Copilot
+	Python
+____________________________________________________________________________
+
+Instalacion de django: En una terminal de VSCode
+
+pip install Django==3.2.8
+- Intala la version 3.2.8 de Django
+
+____________________________________________________________________________
+
+Iniciar Django en el proyecto
+
+En la carpeta del proyecto, se abre en VSCode
+
+django-admin starproject sistema
+- Inicializamos djando con el nombre de proyecto "sistema"(por ejemplo) en la direccion actual. Nos crea la carpeta del proyecto con sus archivos predefinidos.
+
+python manage.py runserver
+- Para iniciar el servidor, pudiendose acceder a 127.0.0.1:8000 desde el navegador
+
+python manage.py startapp libreria
+- Crea una app dentro del proyecto llamada 'libreria' (Porque en el curso se va a hacer la pagina web de una libreria)
+
+settings.py Linea 33, agregar el nombre de la app
+- Asi se agrega la applicacion en el servidor
+
+En views.py de la app, agregamos 'from django.http import HttpResponse' con esta liberia podemos imprimir codigo html en el navegador.
+
+Se crea una funcion 'inicio' en views.py la cual retorna con un mensaje que queremos mostrar en el navegador por medio de la libreria importada.
+
+En libreria creamos el archivo urls.py donde se gestionaran los URL's de mi aplicacion.
+
+A este archivo le agregamos
+
+from django.urls import path
+-Para poder generar rutas de nuestros archivos y usarlos de url
+from . import views
+-Para importar las funciones que creamos en views.py
+
+urlpaterns = [
+    path('', views.inicio, name="inicio"),
+
+]
+-En este array agregamos las rutas del url de la aplicacion
+
+En el archivo urls.py de sistema, debemos incluir las urls de la aplicacion. Asi que importamos 'from django.urls import include' y luego
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('libreria.urls'))
+]
+
+creamos la app la carpeta 'templates' Django reconoce este nombre para ir a buscar los html.
+
+Creamos un html basico donde diga nosotros.
+
+En views.py creamos otra funcion para llamar a la pagina de nosotros. Usando la funcion render en vez de HttpResonse. Asi interpreta el archivo como html y lo envia al navegador.
+
+En template creamos el archivo base.html para armar la plantilla de todas las paginas. Escribiendo bs5-$ se genera todo el script base html para bootstrap.
+
+{% load static %}
+Se incluye al principio del html base, para definir que se puede completar dinamicamente.
+
+{% block titulo %}  {% endblock %}
+Se pueden definir distintos bloques para despues rellenar despendiendo de la seccion de la pagina, por ejemplo este bloque se llama titulo.
+
+Luego en el html de la seccion nosotros, solo debemos traer la base y rellenar los boques definidos
+{% extends  "base.html" %}
+
+{% block titulo %} Nosotros {% endblock %}
+
+{% block contenido %}
+
+Seccion de Nosotros
+
+{% endblock %}
+
+Con esto creamos todas las paginas necesarias en nuestra aplicacion y las enlazamos al url creando la funcion enviews y agregando el path en urls como hicimos anteriormente.
+__________________________________________________________________________________
+
+Conexión con la base de datos:
+
+Se instala xampp y se inicia Apache y MySQL
+Se crea una db en PHPMyAdmin con el nombre libreria y se deja vacia.
+
+Django genera automaticamente sqlite3 como base de datos al correr el servidor por primera vez
+
+sistema->settings.py->DATABASES
+Se cambian las configuraciones de sqlite3 por las de MySQL con los siguientes parametros.
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',	#Se cambia a mysql
+        'NAME': 'libreria',			#Nombre de la DB
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '3306',				#Se optiene del Xampp
+    }
+
+Se necesita instalar algunos paquetes para correr la base de datos.
+pip install PyMySQL	#libreria de la db MySQL
+pip install Pillow	#libreria para procesamiento de imagenes
+
+Intalamos pymysql en el servidor
+servidor->__init_-.py
+	import pymysql
+	pymysql.install_as_MySQLdb()
+
+- Ahora se puede correr el servidor y ya estará enlazado con la db
+
+_________________________________________________________________________________
+
+Crear la estructura de la DB:
+
+libreria->models.py 	#acá se captura la estructura de la base de datos
+
+class Libro(models.Model):	#La tabla como clase y las filas como atributos
+    id = models.AutoField(primary_key=True)
+    titulo = models.CharField(max_length=100, verbose_name='Titulo')
+    imagen = models.ImageField(upload_to='imagenes/', null=True, verbose_name='Imagen')
+    descipcion = models.TextField(null=True, verbose_name='Descripción')
+
+python manage.py makemigrations
+Genera el archivo 0001_initial.py en la carpeta migraciones de la app el cual contienen las instrucciones para generar las tablas, pero todavia no fueron agregadas a la DB.
+
+python manage.py migrate
+Genera en la DB las tablas con el codigo de 0001_initial.py
+__________________________________________________________________________________
+
+Registrar modelo en el admin:
+
+libreria->admin.py
+form .models import Libro 	#Trae el modelo
+
+admin.site.register(Libro)	#Así el administrador puede manipular la tabla
+
+python manage.py createsuperuser #Crea el administrador
+Username: facundo
+Email address: fuvelarde@estudiantes.unsam.edu.ar
+pasword: 12345678
+
+- Corremos el servidor y entrando a localhost/admin nos pedirá el nombre de usuario y la contraseña de administrador que generamos
+
+Ahí podemos ver la db de libreria y apretar añadir para crear un libro
+__________________________________________________________________________________
+
+Propiedades en Modelo y admin
+
+->liberia->models.py
+Se pueden crear metodos a la clase de la tabla. por ejemplo __str__ para que al llamar un objeto de esa tabla para imprimirlo, lo haga con un formato concreto.
+
+Se crea un metodo delete() sobreescribiendo el metodo de heredadod de models para borrar la imagen del servidor.
+
+
+
+
+
